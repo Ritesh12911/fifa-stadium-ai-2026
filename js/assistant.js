@@ -108,7 +108,7 @@ const Assistant = (() => {
           b.classList.toggle('active', b.dataset.lang === _currentLang);
           b.setAttribute('aria-pressed', b.dataset.lang === _currentLang);
         });
-        _renderQuickReplies(_currentLang);
+        _renderQuickReplies(_currentLang);   // re-renders + attaches new listeners
         if (_recognition) _recognition.lang = _currentLang;
       });
     });
@@ -118,11 +118,18 @@ const Assistant = (() => {
     const el = document.getElementById('quick-replies');
     if (!el) return;
     const replies = QUICK_REPLIES[lang] || QUICK_REPLIES.en;
-    el.innerHTML = replies.map(r => `
-      <button class="quick-reply-btn" onclick="Assistant.sendQuickReply(${JSON.stringify(r)})"
-              aria-label="Quick reply: ${r}">
+
+    // Build buttons WITHOUT inline onclick (double-quotes from JSON.stringify break attributes)
+    el.innerHTML = replies.map((r, i) => `
+      <button class="quick-reply-btn" data-reply-index="${i}"
+              aria-label="Quick reply: ${r.replace(/"/g, '&quot;')}">
         ${r}
       </button>`).join('');
+
+    // Attach listeners safely — no quote-escaping issues
+    el.querySelectorAll('.quick-reply-btn').forEach((btn, i) => {
+      btn.addEventListener('click', () => sendQuickReply(replies[i]));
+    });
   }
 
   /**
@@ -215,22 +222,25 @@ const Assistant = (() => {
    */
   function _getDemoResponse(text) {
     const t = text.toLowerCase();
-    if (t.includes('gate') || t.includes('entrada') || t.includes('porte')) {
-      return '🚪 **Gate A** (Main Entrance) is at the North end of the stadium. Show your ticket QR code to security staff. Gates open 2 hours before kickoff. Need directions to a specific gate?';
+    if (t.includes('gate') || t.includes('entrada') || t.includes('porte') || t.includes('portão')) {
+      return '🚪 **Gate A** (Main Entrance) is at the North end of the stadium.\nShow your ticket QR code to security staff.\nGates open 2 hours before kickoff.\nNeed directions to a specific gate? Try the **Smart Navigation** module!';
     }
-    if (t.includes('restroom') || t.includes('toilet') || t.includes('baño') || t.includes('toilette')) {
-      return '🚻 The nearest restrooms are located:\n- **North Concourse** (Section 102–108)\n- **South Concourse** (Section 220–228)\n- All restrooms are wheelchair accessible. Need me to show you on the map?';
+    if (t.includes('restroom') || t.includes('toilet') || t.includes('bathroom') || t.includes('baño') || t.includes('toilette') || t.includes('banheiro') || t.includes('nearest')) {
+      return '🚻 Nearest restrooms:\n- **North Concourse** — Sections 102–108\n- **South Concourse** — Sections 220–228\n- **East Wing** — Level 2\n\nAll restrooms are wheelchair accessible. Use **Smart Navigation** to find the closest one to you!';
     }
-    if (t.includes('food') || t.includes('eat') || t.includes('comida') || t.includes('manger')) {
-      return '🍔 **Food Courts** available:\n- **Court A** (West concourse) – American & Mexican cuisine\n- **Court B** (East concourse) – International options\n- **Court C** (North upper) – Snacks & beverages\n\nAll dietary options labeled. Average wait time: 8–12 min.';
+    if (t.includes('food') || t.includes('eat') || t.includes('hungry') || t.includes('comida') || t.includes('manger') || t.includes('schedule') || t.includes('match') || t.includes('partido') || t.includes('horario')) {
+      if (t.includes('schedule') || t.includes('match') || t.includes('partido')) {
+        return '⚽ **Today at MetLife Stadium:**\n- 15:00 — Group A: Brazil 🇧🇷 vs Germany 🇩🇪\n- 20:00 — Group B: France 🇫🇷 vs Argentina 🇦🇷\n\nDoors open 2 hours before each match. Check the official FIFA app for live updates!';
+      }
+      return '🍔 **Food Courts:**\n- **Court A** (West concourse) — American & Mexican cuisine\n- **Court B** (East concourse) — International options\n- **Court C** (North upper) — Snacks & beverages\n\nAll dietary options labeled. Average wait time: 8–12 min.';
     }
-    if (t.includes('medical') || t.includes('help') || t.includes('emergency') || t.includes('ayuda')) {
-      return '🏥 **Medical Centers** are at:\n- Sections 115 & 235 (field level)\n- First Aid posts at every gate entrance\n\n🚨 **Emergency?** Alert the nearest staff member in a **red vest**, or dial the stadium hotline: **+1-800-FIFA-2026**';
+    if (t.includes('lost') || t.includes('found') || t.includes('perdido') || t.includes('perdu')) {
+      return '🔍 **Lost & Found** is located at the **Info Desk** near Gate A (North entrance).\n\nOperating hours: 2 hours before kickoff to 1 hour after final whistle.\n📞 Stadium hotline: **+1-800-FIFA-2026**';
     }
-    if (t.includes('schedule') || t.includes('match') || t.includes('partido') || t.includes('horario')) {
-      return '⚽ **Today at MetLife Stadium:**\n- 15:00 – Group A: Brazil 🇧🇷 vs Germany 🇩🇪\n- 20:00 – Group B: France 🇫🇷 vs Argentina 🇦🇷\n\nDoors open 2 hours before each match. Check the official FIFA app for live updates!';
+    if (t.includes('medical') || t.includes('help') || t.includes('emergency') || t.includes('hurt') || t.includes('ayuda') || t.includes('aide')) {
+      return '🏥 **Medical Centers:**\n- Section 115 (field level, east side)\n- Section 235 (field level, west side)\n- First Aid at every gate entrance\n\n🚨 **Emergency?** Alert any staff member in a **red vest**, or call: **+1-800-FIFA-2026**';
     }
-    return '👋 Welcome to **StadiumIQ**! I\'m your AI assistant for FIFA World Cup 2026. I can help with:\n- 🗺️ Navigation & directions\n- 🍔 Food & amenities\n- 🚨 Emergency info\n- ⚽ Match schedules\n- 🌐 Multi-language support\n\nAdd your **Gemini API key** in Settings for full AI responses!';
+    return '👋 Welcome to **StadiumIQ**! I\'m your AI assistant for FIFA World Cup 2026.\nI can help with:\n- 🗺️ Navigation & directions\n- 🍔 Food & amenities\n- 🚨 Emergency info\n- ⚽ Match schedules\n- 🌐 Multi-language support\n\n💡 Add your **Gemini API key** in ⚙️ Settings for full AI-powered responses!';
   }
 
   /**

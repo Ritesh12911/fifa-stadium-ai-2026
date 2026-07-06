@@ -9,7 +9,7 @@
 const CONFIG = Object.freeze({
   /** Gemini AI Settings */
   GEMINI: {
-    API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+    API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
     API_KEY: '',          // Set via UI settings panel — never hardcode in production
     MAX_TOKENS: 512,
     TEMPERATURE: 0.7,
