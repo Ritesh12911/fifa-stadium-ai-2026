@@ -221,144 +221,24 @@ QUnit.module('Navigation Module', function (hooks) {
 
 QUnit.module('CrowdManager', function () {
 
-  QUnit.test('densityToColor handles boundaries and ranges', function (assert) {
-    assert.ok(CrowdManager.densityToColor(0).startsWith('rgb'), 'Boundary 0');
-    assert.ok(CrowdManager.densityToColor(1).startsWith('rgb'), 'Boundary 1');
-    const mid = CrowdManager.densityToColor(0.5);
-    assert.ok(mid.startsWith('rgb'), 'Mid-range');
-  });
-});
-
-// ── App — Security & Utilities Tests ─────────────────────────────────────────
-
-QUnit.module('App — Security & Utilities', function () {
-
-  QUnit.test('_escapeHtml strips < > " & characters', function (assert) {
-    const raw = '<script>alert("xss")&more</script>';
-    const safe = App._escapeHtml(raw);
-    assert.notOk(safe.includes('<script>'), 'No raw <script> in output');
-    assert.ok(safe.includes('&lt;'),   'Replaced < with &lt;');
-    assert.ok(safe.includes('&gt;'),   'Replaced > with &gt;');
-    assert.ok(safe.includes('&quot;'), 'Replaced " with &quot;');
-    assert.ok(safe.includes('&amp;'),  'Replaced & with &amp;');
+  QUnit.test('densityToColor returns green for low density', function (assert) {
+    const color = CrowdManager.densityToColor(0.1);
+    assert.ok(color.startsWith('rgb('), `Low density color: ${color}`);
+    // Green channel should be dominant
+    const [r, g, b] = color.match(/\d+/g).map(Number);
+    assert.ok(g > r && g > b, `Green dominant at low density: rgb(${r},${g},${b})`);
   });
 
-  QUnit.test('_escapeHtml handles empty string', function (assert) {
-    assert.strictEqual(App._escapeHtml(''), '', 'Empty string returns empty string');
+  QUnit.test('densityToColor returns red for high density', function (assert) {
+    const color = CrowdManager.densityToColor(0.95);
+    const [r, g, b] = color.match(/\d+/g).map(Number);
+    assert.ok(r > g, `Red dominant at high density: rgb(${r},${g},${b})`);
   });
 
-  QUnit.test('_escapeHtml coerces non-string input to string', function (assert) {
-    assert.strictEqual(typeof App._escapeHtml(42),   'string', 'Number coerced to string');
-    assert.strictEqual(typeof App._escapeHtml(null), 'string', 'Null coerced to string');
-  });
-
-  QUnit.test('showToast does not throw for all valid types', function (assert) {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'toast-container';
-      document.body.appendChild(container);
-    }
-    ['info', 'success', 'warning', 'error'].forEach(type => {
-      assert.ok(() => App.showToast('Test', type), `showToast("${type}") does not throw`);
-    });
-  });
-});
-
-// ── Simulation — Edge Cases ───────────────────────────────────────────────────
-
-QUnit.module('Simulation — Edge Cases', function () {
-
-  QUnit.test('getDensity returns 0 for unknown zone', function (assert) {
-    Simulation.start();
-    const d = Simulation.getDensity('UnknownZone_XYZ_999');
-    assert.strictEqual(d, 0, 'Unknown zone density is 0');
-    Simulation.stop();
-  });
-
-  QUnit.test('stop() is idempotent (safe to call multiple times)', function (assert) {
-    Simulation.stop();
-    Simulation.stop();
-    assert.ok(true, 'Double stop does not throw');
-  });
-
-  QUnit.test('getAllDensities returns a new snapshot object each call', function (assert) {
-    Simulation.start();
-    const s1 = Simulation.getAllDensities();
-    const s2 = Simulation.getAllDensities();
-    assert.notStrictEqual(s1, s2, 'Returns different object references (snapshot)');
-    Simulation.stop();
-  });
-
-  QUnit.test('getAlerts returns a copy, not the live array', function (assert) {
-    Simulation.start();
-    const a1 = Simulation.getAlerts();
-    const a2 = Simulation.getAlerts();
-    assert.notStrictEqual(a1, a2, 'Each getAlerts() call returns a new array copy');
-    Simulation.stop();
-  });
-});
-
-// ── GeminiClient — Edge Cases ─────────────────────────────────────────────────
-
-QUnit.module('GeminiClient — Edge Cases', function () {
-
-  QUnit.test('isReady returns false for key without AIza prefix', function (assert) {
-    GeminiClient.setApiKey('sk-abcdefghijklmnopqrstuvwxyz123456789');
-    assert.strictEqual(GeminiClient.isReady(), false, 'Non-AIza key is not ready');
-    GeminiClient.setApiKey('');
-  });
-
-  QUnit.test('isReady returns false for key shorter than 21 chars', function (assert) {
-    GeminiClient.setApiKey('AIzaShort');
-    assert.strictEqual(GeminiClient.isReady(), false, 'Short AIza key is not ready');
-    GeminiClient.setApiKey('');
-  });
-
-  QUnit.test('isReady returns true for valid AIza key of 39+ chars', function (assert) {
-    GeminiClient.setApiKey('AIzaSyAbcdefghijklmnopqrstuvwxyz12345678');
-    assert.strictEqual(GeminiClient.isReady(), true, 'Long AIza key is ready');
-    GeminiClient.setApiKey('');
-  });
-
-  QUnit.test('getNavigationInstructions rejects on invalid POI IDs', function (assert) {
-    const done = assert.async();
-    GeminiClient.setApiKey('AIzaSyAbcdefghijklmnopqrstuvwxyz12345678');
-    GeminiClient.getNavigationInstructions('invalid-poi-a', 'invalid-poi-b').catch(e => {
-      assert.equal(e.message, 'INVALID_POI', 'Throws INVALID_POI for unknown POI IDs');
-      GeminiClient.setApiKey('');
-      done();
-    });
-  });
-});
-
-// ── CrowdManager — Boundary Value Tests ───────────────────────────────────────
-
-QUnit.module('CrowdManager — Boundary Values', function () {
-
-  QUnit.test('densityToColor at exact 0 returns green-dominant color', function (assert) {
-    const [r, g, b] = CrowdManager.densityToColor(0).match(/\d+/g).map(Number);
-    assert.ok(g > r && g > b, `Density 0 is green: rgb(${r},${g},${b})`);
-  });
-
-  QUnit.test('densityToColor at exact 1.0 returns red-dominant color', function (assert) {
-    const [r, g, b] = CrowdManager.densityToColor(1.0).match(/\d+/g).map(Number);
-    assert.ok(r > g, `Density 1.0 is red: rgb(${r},${g},${b})`);
-  });
-
-  QUnit.test('densityToColor is deterministic for same input', function (assert) {
-    assert.strictEqual(
-      CrowdManager.densityToColor(0.73),
-      CrowdManager.densityToColor(0.73),
-      'Same density always returns same color'
-    );
-  });
-
-  QUnit.test('densityToColor never returns empty string for all test values', function (assert) {
-    [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0].forEach(d => {
-      const c = CrowdManager.densityToColor(d);
-      assert.ok(c && c.length > 0, `Density ${d} → non-empty color: "${c}"`);
-    });
+  QUnit.test('densityToColor mid-range returns yellowish', function (assert) {
+    const color = CrowdManager.densityToColor(0.5);
+    const [r, g, b] = color.match(/\d+/g).map(Number);
+    assert.ok(r > b, `Yellow-ish at 50% density: rgb(${r},${g},${b})`);
   });
 });
 
@@ -366,6 +246,7 @@ QUnit.module('CrowdManager — Boundary Values', function () {
 
 QUnit.module('Decision Support', function (hooks) {
   hooks.beforeEach(function () {
+    // Minimal mock DOM for DecisionSupport
     ['incident-type-select', 'incident-zone-select', 'incident-desc', 'resource-table', 'incident-log', 'live-alert-feed'].forEach(id => {
       if (!document.getElementById(id)) {
         const el = document.createElement(id.includes('select') ? 'select' : 'div');

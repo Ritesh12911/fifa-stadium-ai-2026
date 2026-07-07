@@ -1,171 +1,186 @@
 # StadiumIQ — FIFA World Cup 2026 Smart Stadium AI Platform
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://fifa-stadium-ai-2026.streamlit.app/)
-
-Developed by for the **FIFA World Cup 2026 GenAI Hackathon**.
-
-StadiumIQ is a production-grade, AI-powered smart stadium platform that tackles real operational challenges faced by stadium organizers, staff, and fans at a 68,000-capacity live event.
+> **Challenge 4: Smart Stadiums & Tournament Operations**  
+> Build a GenAI-enabled architecture that optimizes venue operations and elevates the tournament experience for fans, organizers, volunteers, and on-ground staff.
 
 ---
 
-## 🎯 Problem Statement Alignment
+## 🏟️ Overview
 
-| Challenge | StadiumIQ Solution |
+**StadiumIQ** is a comprehensive AI-powered web platform built for FIFA World Cup 2026. It leverages **Google Gemini 1.5 Flash** to power five integrated modules that address all core challenge tracks:
+
+| Module | Track |
 |---|---|
-| **Real-time crowd safety** | Live canvas heatmap with zone-level density tracking (warning at 85%, critical at 95%), auto-generated alerts, and 8-zone simulation with realistic crowd movement patterns |
-| **Multilingual fan support** | Gemini 2.0 Flash–powered AI assistant supporting 10 languages (EN/ES/FR/PT/AR/ZH/DE/HI/JA/KO) with voice input and context-aware quick replies |
-| **Indoor navigation** | Interactive SVG stadium map with 18 POIs (gates, medical, food, restrooms, VIP, exits), point-to-point routing with AI-generated step-by-step directions, and wheelchair-accessible mode |
-| **Incident decision support** | Structured incident reporting with AI severity analysis (LOW/MEDIUM/HIGH/CRITICAL), automated resource recommendations, ETA, and a live incident log with status tracking |
-| **Scalable operations** | Real-time simulation subscriber model with pub/sub architecture enabling all four modules to react independently to the same live data stream |
+| 📊 Live Dashboard | Operational Intelligence |
+| 🔥 Crowd Intelligence | Dynamic Crowd Management |
+| 🗺️ Smart Navigation | Smart Indoor Navigation |
+| 🤖 AI Assistant | Multi-Language Assistance |
+| ⚡ Decision Support | Real-Time Decision Support |
 
 ---
 
-## 🏗️ Architecture Overview
+## 🚀 Features
 
-```
-┌────────────────────────────────────────────────┐
-│              StadiumIQ Platform                │
-│                                                │
-│  config.js ──→ Central config & POI registry  │
-│  simulation.js ──→ Pub/Sub live data engine    │
-│       │                                        │
-│       ├──→ crowd.js      (Canvas heatmap)      │
-│       ├──→ decision.js   (Incident AI)         │
-│       └──→ app.js        (Dashboard KPIs)      │
-│                                                │
-│  gemini.js ──→ Gemini 2.0 Flash API client    │
-│       └──→ assistant.js  (Chat + Navigation)   │
-└────────────────────────────────────────────────┘
-```
+### 📊 Dashboard
+- Live KPI metrics: fans in stadium, crowd density, active alerts, languages served
+- Match schedule with live scores
+- One-click access to all modules
+- Animated counters that update every 3 seconds
 
-**Key Design Decisions:**
-- **Module pattern (IIFE + closures)** — zero global namespace pollution, private state per module
-- **Pub/Sub simulation** — any number of modules subscribe to live data without coupling
-- **Config-driven** — all constants in `config.js` (`Object.freeze`), making it trivial to swap real IoT data for simulated data
-- **Graceful degradation** — every AI feature has a full offline demo mode; no API key = no broken UI
+### 🔥 Crowd Intelligence
+- **Canvas-based heatmap** showing real-time zone density with green→yellow→red gradient
+- 8-zone monitoring: North Stand, South Stand, East/West Wings, VIP, Media, Concourse A/B
+- Auto-generated alerts when zones exceed 85% (warning) or 95% (critical)
+- Pulsing animation for critical zones
+- Zone-by-zone density cards with status badges
 
----
+### 🗺️ Smart Indoor Navigation
+- **Interactive SVG stadium map** with 18 clickable Points of Interest
+- Types: Gates, Medical, Food Courts, Restrooms, VIP, Media, Info, Emergency Exits
+- AI-powered step-by-step directions (Gemini API)
+- **Accessibility mode** — wheelchair-friendly routes only
+- Animated route path between selected POIs
 
-## 🌟 Four Core Modules
+### 🤖 Multilingual AI Assistant
+- Powered by **Google Gemini 1.5 Flash**
+- Supports **10 languages**: English, Spanish, French, Portuguese, Arabic, Chinese, German, Hindi, Japanese, Korean
+- Auto-detects and responds in user's language
+- **Voice input** via Web Speech API
+- Quick-reply suggestions per language
+- Demo mode with pre-built answers (no API key required)
 
-### 1. 🔥 Crowd Intelligence
-- Live **canvas-based heatmap** with per-zone density color coding (green → yellow → red)
-- **Animated critical zone pulses** at ≥95% occupancy
-- Zone density cards with ARIA-labelled progress bars for accessibility
-- Simulated crowd movement patterns per match phase (Pre-Match → Kick-off → Half Time → Full Time)
-
-### 2. 🗺️ Smart Navigation
-- **Interactive SVG stadium map** with 18 categorized POIs
-- Click-to-select origin and destination routing with animated path
-- **AI-generated turn-by-turn directions** via Gemini 2.0 Flash
-- **Wheelchair-accessible route filtering** (♿ mode)
-- Demo fallback directions when no API key is set
-
-### 3. 🤖 AI Assistant (Multilingual)
-- **10-language support** with per-language quick reply suggestions
-- **Web Speech API** voice input with visual feedback
-- Context-aware conversation history (last 20 turns passed to Gemini)
-- Demo response engine covering: gates, restrooms, food, schedules, lost & found, medical
-- Prompt injection protection via input sanitization
-
-### 4. ⚡ Decision Support
-- Structured incident reporting with zone and type selectors
-- **Gemini AI severity analysis** with immediate action plan, resource list, and ETA
-- Persistent incident log with ACTIVE/RESOLVED status tracking
-- Live alert feed from simulation (top 5 priority alerts)
-- Resource allocation table (security, medical, fire, transport, comms, accessibility)
+### ⚡ Decision Support (Staff Hub)
+- Incident reporting form with AI severity analysis
+- JSON-structured AI response: severity, actions, resources, ETA
+- Live alert feed updated from simulation
+- Resource allocation table (security, medical, fire, transport)
+- Incident log with history
 
 ---
 
-## 🔒 Security Implementation
+## 🛠️ Tech Stack
 
-| Layer | Implementation |
+| Layer | Technology |
 |---|---|
-| **Content Security Policy** | Strict CSP header in `<meta>` — no inline scripts, only approved origins |
-| **Input sanitization** | All user input stripped of HTML tags and capped at 2000 chars before Gemini API calls |
-| **Output escaping** | All dynamic HTML insertion uses `_escapeHtml()` — prevents XSS from AI responses or incident data |
-| **API key protection** | Key stored only in runtime memory, cleared from DOM immediately after save, never hardcoded |
-| **API key validation** | Must start with `AIza` and be >20 chars before any API call is attempted |
-| **Network error isolation** | All `fetch()` calls wrapped in try/catch with user-friendly error messages |
+| Frontend | Pure HTML5, CSS3, Vanilla JS (ES6+) |
+| AI Engine | Google Gemini 1.5 Flash REST API |
+| Charts | Canvas 2D API (no external libs) |
+| Maps | Inline SVG |
+| Testing | QUnit (CDN) |
+| Fonts | Google Fonts — Inter + Orbitron |
+| Voice | Web Speech API |
+
+**No build step required. Zero external dependencies for core functionality.**
 
 ---
 
-## ✅ Test Coverage
+## ⚡ Quick Start
 
-Tests are located in [`tests/tests.js`](tests/tests.js) and run via QUnit in the browser (`tests/index.html`).
+1. Clone or download this repository
+2. Open `index.html` in any modern browser
+3. The app works immediately in **Demo Mode**
 
-**Test modules:**
-- `Simulation Engine` — density ranges, stats shape, subscribe/unsubscribe, alert structure
-- `Simulation — Edge Cases` — unknown zones, idempotent stop(), snapshot isolation
-- `Configuration` — frozen CONFIG, POI schema, language schema, threshold logic
-- `GeminiClient` — isReady() with valid/invalid keys, API_KEY_MISSING rejection, network errors, invalid POI handling
-- `GeminiClient — Edge Cases` — key prefix validation, key length validation, INVALID_POI rejection
-- `Navigation Module` — SVG rendering, accessible POI filtering
-- `CrowdManager` — color mapping at all density values
-- `CrowdManager — Boundary Values` — density 0, 0.5, 1.0, determinism, no empty output
-- `Decision Support` — incident type population, alert count update
-- `App — Security & Utilities` — `_escapeHtml()` XSS prevention, type coercion, toast rendering
-- `Accessibility` — ARIA labels, aria-current, role=dialog, live regions
+### To enable full AI features:
+1. Get a free Gemini API key from [aistudio.google.com](https://aistudio.google.com/app/apikey)
+2. Click **⚙️ Settings** in the sidebar
+3. Paste your API key and click **Save**
+4. All AI features are now active!
+
+> ⚠️ API key is stored **in memory only** — it's never sent to any server other than Google's API endpoint.
 
 ---
 
-## 📂 Project Structure
+## 🧪 Running Tests
+
+Open `tests/index.html` in a browser. The QUnit test suite covers:
+
+- ✅ Simulation Engine (density generation, alert logic, pub-sub)
+- ✅ Configuration validation (POIs, thresholds, languages)
+- ✅ Gemini Client (API key validation, error handling, XSS sanitization)
+- ✅ Navigation Module (SVG rendering, accessibility filtering)
+- ✅ Crowd Manager (color mapping, density logic)
+- ✅ Decision Support (incident form, alert updating)
+- ✅ Accessibility (ARIA labels, live regions, dialog roles)
+
+---
+
+## 📁 Project Structure
 
 ```
 fifa-stadium-ai-2026/
-├── index.html          # Semantic SPA shell with CSP, ARIA landmarks, and all page sections
+├── index.html              ← Main application (SPA)
 ├── css/
-│   └── style.css       # Design system with CSS variables, keyframe animations, responsive layout
+│   └── style.css           ← Complete design system
 ├── js/
-│   ├── config.js       # Frozen central config: API settings, zones, POIs, languages, incident types
-│   ├── simulation.js   # Pub/Sub live data engine with match-phase crowd movement model
-│   ├── crowd.js        # Canvas heatmap renderer with glow effects and zone cards
-│   ├── navigation.js   # SVG map, POI click routing, accessibility mode, AI directions
-│   ├── assistant.js    # Multilingual chatbot, voice input, quick replies, demo responses
-│   ├── decision.js     # Incident form, AI analysis, incident log, resource table
-│   ├── gemini.js       # Gemini 2.0 Flash API client with sanitization and error handling
-│   └── app.js          # SPA router, KPI dashboard, toast system, settings, boot sequence
-├── tests/
-│   ├── index.html      # QUnit test runner
-│   └── tests.js        # 40+ unit & integration tests across all modules
-├── streamlit_app.py    # Streamlit wrapper for cloud deployment
-├── requirements.txt    # Python dependencies (streamlit only)
-└── README.md           # This document
+│   ├── config.js           ← Configuration & constants
+│   ├── gemini.js           ← Google Gemini AI client
+│   ├── simulation.js       ← Live data simulation engine
+│   ├── crowd.js            ← Crowd management + canvas heatmap
+│   ├── navigation.js       ← Smart navigation + SVG map
+│   ├── assistant.js        ← Multilingual AI chat
+│   ├── decision.js         ← Decision support + incident AI
+│   └── app.js              ← SPA router + main controller
+└── tests/
+    ├── index.html          ← Test runner
+    └── tests.js            ← QUnit test suite
 ```
 
 ---
 
-## ⚡ How to Run
+## 🔒 Security
 
-### Option A: Static (Zero Dependencies)
-Open `index.html` directly in any modern browser (Chrome, Edge, Firefox). No build step required.
-
-### Option B: Streamlit Cloud
-```bash
-pip install -r requirements.txt
-streamlit run streamlit_app.py
-```
-Or deploy to [Streamlit Community Cloud](https://share.streamlit.io/) by linking this repository.
-
-### Option C: Run Tests
-Open `tests/index.html` in a browser to see the full QUnit test report.
+- **Content Security Policy** (CSP) header prevents XSS
+- User input sanitized before any AI call (HTML stripped, length capped)
+- API key stored in memory only — not in localStorage or cookies
+- No third-party analytics or tracking
+- All external connections: Google Fonts (styles), Google AI API only
 
 ---
 
-## 🎨 Design System
+## ♿ Accessibility
 
-- **Theme:** Premium obsidian dark (`#050a14` base, `#0a1628` cards)
-- **Accent palette:** Neon cyan (`#00d4ff`), success green (`#22c55e`), warning amber (`#f0b429`), critical red (`#ef4444`)
-- **Typography:** Inter (UI) + JetBrains Mono (data/code) via Google Fonts
-- **Motion:** Micro-animations on all interactive elements, canvas animation at 60fps, CSS keyframe pulses for alerts
-- **Responsive:** Mobile sidebar with hamburger toggle, fluid grid layout
+- Full **ARIA** labeling (roles, aria-label, aria-live, aria-current)
+- Keyboard navigation (Tab, Enter, Escape)
+- High contrast color palette
+- Screen reader support via semantic HTML5
+- WCAG 2.1 AA target compliance
 
 ---
 
-## 🔑 API Key Setup
+## 📊 Evaluation Criteria Coverage
 
-1. Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com)
-2. Click **⚙️ Settings & API Key** in the sidebar
-3. Paste your key — it is stored only in memory and never transmitted anywhere except the Gemini API
+| Criterion | Implementation |
+|---|---|
+| **Code Quality** | JSDoc comments, ES6+ modules, separation of concerns, no global pollution |
+| **Security** | CSP meta tag, input sanitization, key never stored |
+| **Efficiency** | Canvas RAF loop, debounced simulation, lightweight (no npm) |
+| **Testing** | 25+ test cases across all modules using QUnit |
+| **Accessibility** | ARIA labels, keyboard nav, live regions, semantic HTML |
+| **Problem Alignment** | All 4 tracks: crowd, navigation, multilang, decision support |
 
-All four modules have full **demo mode** — the app is completely functional without an API key.
+---
+
+## 🌍 Supported Venues (FIFA WC 2026)
+
+- MetLife Stadium (New York/New Jersey)
+- SoFi Stadium (Los Angeles)
+- AT&T Stadium (Dallas)
+- Levi's Stadium (San Francisco Bay Area)
+- Arrowhead Stadium (Kansas City)
+- Rose Bowl (Pasadena)
+- Hard Rock Stadium (Miami)
+- Estadio Azteca (Mexico City)
+- Estadio BBVA (Monterrey)
+- BC Place (Vancouver)
+- BMO Field (Toronto)
+
+---
+
+## 👤 Author
+
+Built for **Hack2Skill Challenge 4 — Smart Stadiums & Tournament Operations**  
+Submission deadline: 19/07/2026 11:59 PM (IST)
+
+---
+
+*StadiumIQ — Powered by Google Gemini AI · Built for FIFA World Cup 2026*

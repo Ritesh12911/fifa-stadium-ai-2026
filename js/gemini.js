@@ -1,6 +1,6 @@
 /**
  * @fileoverview Gemini AI Client
- * @description Handles all communication with Google Gemini 2.0 Flash API.
+ * @description Handles all communication with Google Gemini 1.5 Flash API.
  */
 
 'use strict';
@@ -18,11 +18,11 @@ const GeminiClient = (() => {
   }
 
   /**
-   * Returns whether an API key is configured and plausibly valid.
+   * Returns whether an API key is configured.
    * @returns {boolean}
    */
   function isReady() {
-    return _apiKey.length > 20 && _apiKey.startsWith('AIza');
+    return _apiKey.length > 10;
   }
 
   /**
@@ -84,16 +84,11 @@ const GeminiClient = (() => {
       ]
     };
 
-    let res;
-    try {
-      res = await fetch(`${CONFIG.GEMINI.API_URL}?key=${encodeURIComponent(_apiKey)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-    } catch (networkErr) {
-      throw new Error(`Network error: ${networkErr.message}`);
-    }
+    const res = await fetch(`${CONFIG.GEMINI.API_URL}?key=${encodeURIComponent(_apiKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

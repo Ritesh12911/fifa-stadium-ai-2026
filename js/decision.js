@@ -160,8 +160,7 @@ const DecisionSupport = (() => {
       descEl.value = '';
 
     } catch (e) {
-      const safeMsg = String(e.message).replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      resultEl.innerHTML = `<div class="error-msg">⚠️ Analysis failed: ${safeMsg}</div>`;
+      resultEl.innerHTML = `<div class="error-msg">⚠️ Analysis failed: ${e.message}</div>`;
     }
   }
 
@@ -192,19 +191,16 @@ const DecisionSupport = (() => {
       return;
     }
 
-    /** @param {string} s */
-    const esc = s => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
     el.innerHTML = _incidentLog.map(inc => `
-      <div class="incident-row severity-${esc(inc.severity)}" role="listitem"
-           aria-label="Incident ${esc(inc.id)}: ${esc(inc.type)} in ${esc(inc.zone)}, status ${esc(inc.status)}">
+      <div class="incident-row severity-${inc.severity}" role="listitem"
+           aria-label="Incident ${inc.id}: ${inc.type} in ${inc.zone}, status ${inc.status}">
         <div class="incident-meta">
-          <span class="inc-id">${esc(inc.id)}</span>
-          <span class="inc-time">⏰ ${esc(inc.time)}</span>
-          <span class="inc-badge ${inc.status.toLowerCase()}">${esc(inc.status)}</span>
+          <span class="inc-id">${inc.id}</span>
+          <span class="inc-time">⏰ ${inc.time}</span>
+          <span class="inc-badge ${inc.status.toLowerCase()}">${inc.status}</span>
         </div>
-        <div class="incident-title">${esc(inc.type)} — <em>${esc(inc.zone)}</em></div>
-        <div class="incident-summary">${esc(inc.summary)}</div>
+        <div class="incident-title">${inc.type} — <em>${inc.zone}</em></div>
+        <div class="incident-summary">${inc.summary}</div>
       </div>`).join('');
   }
 
