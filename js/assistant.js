@@ -204,10 +204,11 @@ const Assistant = (() => {
   function _appendBubble(log, role, text, isError = false) {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const formatted = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const safeText = text.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     log.insertAdjacentHTML('beforeend', `
       <div class="msg-row ${role}" role="listitem">
         ${role === 'bot' ? '<div class="msg-avatar" aria-hidden="true">🏟️</div>' : ''}
-        <div class="msg-bubble ${isError ? 'error' : ''}" aria-label="${role === 'user' ? 'You' : 'StadiumIQ'}: ${text}">
+        <div class="msg-bubble ${isError ? 'error' : ''}" aria-label="${role === 'user' ? 'You' : 'StadiumIQ'}: ${safeText}">
           ${formatted}
           <span class="msg-time" aria-hidden="true">${time}</span>
         </div>

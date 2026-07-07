@@ -189,13 +189,21 @@ const Navigation = (() => {
    * Toggles accessibility-only mode.
    * @param {boolean} enabled
    */
+  /**
+   * Toggles accessibility-only mode and invalidates any non-accessible
+   * route selections that would become unreachable.
+   * @param {boolean} enabled
+   */
   function setAccessibleMode(enabled) {
     _accessibleOnly = enabled;
-    if (enabled && _from) {
-      const fromPOI = CONFIG.POIS.find(p => p.id === _from);
+    if (enabled) {
+      const fromPOI = _from ? CONFIG.POIS.find(p => p.id === _from) : null;
+      const toPOI   = _to   ? CONFIG.POIS.find(p => p.id === _to)   : null;
       if (fromPOI && !fromPOI.accessible) { _from = null; _to = null; }
+      else if (toPOI && !toPOI.accessible) { _to = null; }
     }
     renderMap('nav-map');
+    _updateSelectors();
   }
 
   /**

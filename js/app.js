@@ -99,7 +99,6 @@ const App = (() => {
         break;
       case 'navigation':
         Navigation.renderMap('nav-map');
-        Navigation.renderMap('nav-map'); // double render ensures SVG events attached
         break;
       case 'assistant':
         Assistant.init();
@@ -114,13 +113,18 @@ const App = (() => {
   // ── Sidebar ─────────────────────────────────────────────────────────────────
 
   function toggleSidebar() {
-    document.getElementById('sidebar')?.classList.toggle('open');
+    const sidebar = document.getElementById('sidebar');
+    const isOpen = sidebar?.classList.toggle('open');
     document.getElementById('sidebar-overlay')?.classList.toggle('active');
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   }
 
   function closeSidebar() {
     document.getElementById('sidebar')?.classList.remove('open');
     document.getElementById('sidebar-overlay')?.classList.remove('active');
+    const btn = document.getElementById('hamburger-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   }
 
   // ── Settings Panel ──────────────────────────────────────────────────────────
@@ -153,16 +157,31 @@ const App = (() => {
    * @param {string} message
    * @param {'success'|'warning'|'error'|'info'} [type='info']
    */
+  /**
+   * Escapes a string for safe insertion as text content.
+   * @param {string} str
+   * @returns {string}
+   */
+  function _escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
     const id = `toast-${Date.now()}`;
     const icons = { success: '✅', warning: '⚠️', error: '❌', info: 'ℹ️' };
+    const safeMsg = _escapeHtml(message);
     container.insertAdjacentHTML('beforeend', `
       <div id="${id}" class="toast toast-${type}" role="alert" aria-live="polite">
-        <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
-        <span class="toast-msg">${message}</span>
+        <span class="toast-icon" aria-hidden="true">${icons[type] || 'ℹ️'}</span>
+        <span class="toast-msg">${safeMsg}</span>
       </div>`);
 
     // Auto remove
@@ -248,7 +267,7 @@ const App = (() => {
     console.log('[StadiumIQ] App initialized ✅');
   }
 
-  return { boot, navigate, toggleSidebar, closeSidebar, toggleSettings, saveSettings, showToast };
+  return { boot, navigate, toggleSidebar, closeSidebar, toggleSettings, saveSettings, showToast, _escapeHtml };
 })();
 
 // Boot when DOM is ready
