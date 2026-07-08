@@ -1,9 +1,9 @@
 # StadiumIQ — FIFA World Cup 2026 Smart Stadium AI Platform
 
-[![CI](https://github.com/Ritesh12911/fifa-stadium-ai-2026/actions/workflows/ci.yml/badge.svg)](https://github.com/Ritesh12911/fifa-stadium-ai-2026/actions/workflows/ci.yml)
+[![CI/CD - GitHub Pages](https://github.com/Ritesh12911/fifa-stadium-ai-2026/actions/workflows/ci.yml/badge.svg)](https://github.com/Ritesh12911/fifa-stadium-ai-2026/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg)](https://streamlit.io)
+[![Platform: Web](https://img.shields.io/badge/Platform-Static%20Web-blue.svg)](https://github.com/Ritesh12911/fifa-stadium-ai-2026)
+[![Deployment: GitHub Pages](https://img.shields.io/badge/Deployment-GitHub%20Pages-orange.svg)](https://ritesh12911.github.io/fifa-stadium-ai-2026)
 
 > **Challenge 4: Smart Stadiums & Tournament Operations**  
 > Build a GenAI-enabled architecture that optimizes venue operations and elevates the tournament experience for fans, organizers, volunteers, and on-ground staff.
@@ -79,15 +79,27 @@
 
 ---
 
-## ⚡ Quick Start
+## ⚡ Quick Start & Deployment
 
-1. Clone or download this repository
-2. Open `index.html` in any modern browser
-3. The app works immediately in **Demo Mode**
+### Run Locally
+1. Clone or download this repository:
+   ```bash
+   git clone https://github.com/Ritesh12911/fifa-stadium-ai-2026.git
+   ```
+2. Open `index.html` in any modern web browser.
+3. The app works immediately in **Demo Mode**.
+
+### Deploy on GitHub Pages
+This repository is configured with a GitHub Actions workflow to automatically deploy to GitHub Pages on every push to the `main` branch:
+
+1. In your GitHub repository, go to **Settings** > **Pages**.
+2. Under **Build and deployment** > **Source**, select **GitHub Actions** (or select **Deploy from a branch** and choose `main` branch / root folder).
+3. Push changes to `main` branch. GitHub Actions will build, test, and host the app at:
+   `https://ritesh12911.github.io/fifa-stadium-ai-2026/`
 
 ### To enable full AI features:
 1. Get a free Gemini API key from [aistudio.google.com](https://aistudio.google.com/app/apikey)
-2. Click **⚙️ Settings** in the sidebar
+2. Click **⚙️ Settings** in the sidebar of the deployed web application
 3. Paste your API key and click **Save**
 4. All AI features are now active!
 
@@ -115,7 +127,7 @@ Open `tests/index.html` in a browser. The QUnit test suite covers:
 fifa-stadium-ai-2026/
 ├── .github/
 │   ├── workflows/
-│   │   └── ci.yml              ← CI/CD pipeline (lint + test + security)
+│   │   └── ci.yml              ← CI/CD pipeline (QUnit + GitHub Pages build)
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── bug_report.md       ← Bug report template
 │   │   └── feature_request.md  ← Feature request template
@@ -133,12 +145,8 @@ fifa-stadium-ai-2026/
 │   └── app.js                  ← SPA router + main controller
 ├── tests/
 │   ├── index.html              ← QUnit test runner (browser)
-│   ├── tests.js                ← QUnit test suite (25+ cases)
-│   └── test_streamlit_app.py   ← Python unit tests (pytest)
+│   └── tests.js                ← QUnit test suite (25+ cases)
 ├── index.html                  ← Main application (SPA)
-├── streamlit_app.py            ← Streamlit deployment wrapper
-├── pyproject.toml              ← Python project configuration
-├── requirements.txt            ← Python dependencies
 ├── LICENSE                     ← MIT License
 ├── CONTRIBUTING.md             ← Contribution guidelines
 ├── CODE_OF_CONDUCT.md          ← Community standards
@@ -174,13 +182,13 @@ fifa-stadium-ai-2026/
 | Criterion | Implementation |
 |---|---|
 | **Code Quality** | JSDoc comments, ES6+ modules, separation of concerns, no global pollution, `.editorconfig` |
-| **Security** | CSP meta tag, input sanitization, key never stored, `SECURITY.md` policy, dependency auditing |
-| **Efficiency** | Canvas RAF loop, debounced simulation, lightweight (no npm), cached Streamlit builds |
-| **Testing** | 25+ JS test cases (QUnit) + Python unit tests (pytest), CI across Python 3.10–3.12 |
-| **CI/CD** | GitHub Actions: linting (flake8), matrix testing, security auditing (`pip-audit`) |
+| **Security** | CSP meta tag, input sanitization, key never stored, `SECURITY.md` policy |
+| **Efficiency** | Canvas RAF loop, debounced simulation, lightweight (no npm), optimized static rendering |
+| **Testing** | 25+ JS test cases (QUnit) running headlessly in CI |
+| **CI/CD** | GitHub Actions: static testing & automated deployment to GitHub Pages on push to `main` |
 | **Documentation** | Comprehensive README, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue/PR templates |
 | **Accessibility** | ARIA labels, keyboard nav, live regions, semantic HTML, WCAG 2.1 AA |
-| **Licensing** | MIT License with proper `LICENSE` file and `pyproject.toml` metadata |
+| **Licensing** | MIT License with proper `LICENSE` file |
 | **Problem Alignment** | All 4 tracks: crowd, navigation, multilang, decision support |
 
 ---
