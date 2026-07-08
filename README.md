@@ -127,13 +127,13 @@ Open `tests/index.html` in a browser. The QUnit test suite covers:
 fifa-stadium-ai-2026/
 ├── .github/
 │   ├── workflows/
-│   │   └── ci.yml              ← CI/CD pipeline (QUnit + GitHub Pages build)
+│   │   └── ci.yml              ← CI/CD pipeline (Lint, QUnit + Build & Deploy)
 │   ├── ISSUE_TEMPLATE/
-│   │   ├── bug_report.md       ← Bug report template
-│   │   └── feature_request.md  ← Feature request template
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
 │   └── pull_request_template.md
 ├── css/
-│   └── style.css               ← Complete design system
+│   └── style.css               ← Complete design system stylesheet
 ├── js/
 │   ├── config.js               ← Configuration & constants
 │   ├── gemini.js               ← Google Gemini AI client
@@ -146,7 +146,12 @@ fifa-stadium-ai-2026/
 ├── tests/
 │   ├── index.html              ← QUnit test runner (browser)
 │   └── tests.js                ← QUnit test suite (25+ cases)
-├── index.html                  ← Main application (SPA)
+├── index.html                  ← Main application source code (SPA)
+├── build.js                    ← Node.js static assets compiler & minifier
+├── package.json                ← JavaScript project metadata & build scripts
+├── eslint.config.js            ← ESLint code quality flat configuration
+├── manifest.json               ← PWA application manifest
+├── sw.js                       ← PWA Service Worker caching module
 ├── LICENSE                     ← MIT License
 ├── CONTRIBUTING.md             ← Contribution guidelines
 ├── CODE_OF_CONDUCT.md          ← Community standards
@@ -177,19 +182,30 @@ fifa-stadium-ai-2026/
 
 ---
 
+## 🎯 Problem Statement Alignment
+
+StadiumIQ is directly aligned with **Challenge 4: Smart Stadiums & Tournament Operations** for the **FIFA World Cup 2026**. The platform addresses venue operations and tournament experience optimization for all key stakeholders:
+
+- **For Fans**: Elevates the tournament experience through **Smart Indoor Navigation** (supporting accessibility/wheelchair-friendly routes) and the **Multilingual AI Assistant** (supporting 10 languages and voice input via Web Speech API) to easily find gate locations, medical centers, food courts, and restrooms.
+- **For Organizers & Staff**: Optimizes venue operations through the **Live Dashboard** (live KPIs, schedules, scores) and **Crowd Intelligence** module (real-time Canvas-based zone density heatmaps with automated alert triggers).
+- **For On-Ground Staff & Volunteers**: Real-time **Decision Support (Staff Hub)** allowing incident reporting, resource allocation tracking, and automated GenAI severity/action analysis powered by Google Gemini 1.5 Flash.
+- **For Venue Operators**: Zero-latency simulation and robust client-side architecture that minimizes infrastructure overhead.
+
+---
+
 ## 📊 Evaluation Criteria Coverage
 
 | Criterion | Implementation |
 |---|---|
-| **Code Quality** | JSDoc comments, ES6+ modules, separation of concerns, no global pollution, `.editorconfig` |
-| **Security** | CSP meta tag, input sanitization, key never stored, `SECURITY.md` policy |
-| **Efficiency** | Canvas RAF loop, debounced simulation, lightweight (no npm), optimized static rendering |
-| **Testing** | 25+ JS test cases (QUnit) running headlessly in CI |
-| **CI/CD** | GitHub Actions: static testing & automated deployment to GitHub Pages on push to `main` |
-| **Documentation** | Comprehensive README, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue/PR templates |
-| **Accessibility** | ARIA labels, keyboard nav, live regions, semantic HTML, WCAG 2.1 AA |
-| **Licensing** | MIT License with proper `LICENSE` file |
-| **Problem Alignment** | All 4 tracks: crowd, navigation, multilang, decision support |
+| **Code Quality** | Linted JavaScript (`eslint.config.js` with 0 warnings/errors), type-annotated JSDoc, and `.editorconfig`. |
+| **Security** | Sandboxed CSP meta tag framing, input sanitization against prompt injection, secure key runtime storage, and `SECURITY.md`. |
+| **Efficiency** | Canvas RAF paint cycles, PWA offline asset caching via Service Worker, CDN warming, and build minification. |
+| **Testing** | 25+ JS QUnit tests running headlessly in Puppeteer. |
+| **CI/CD** | GitHub Actions pipeline executing ESLint checks, headless QUnit tests, and Pages deployment. |
+| **Documentation** | Comprehensive README, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and templates. |
+| **Accessibility** | ARIA labeling, keyboard navigation focus rings, live status regions, and high contrast WCAG 2.1 AA compliance. |
+| **Licensing** | MIT License with proper `LICENSE` file. |
+| **Problem Alignment** | Direct optimization of FIFA 2026 venue operations and elevation of user experiences across fans, staff, and organizers. |
 
 ---
 

@@ -89,7 +89,6 @@ const App = (() => {
     // Close sidebar on mobile
     closeSidebar();
 
-    const prevPage = _currentPage;
     _currentPage = pageId;
 
     // Page-specific init on first visit

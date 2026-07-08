@@ -1,0 +1,23 @@
+{
+  "name": "stadiumiq",
+  "version": "1.2.0",
+  "description": "StadiumIQ — FIFA World Cup 2026 Smart Stadium AI Platform",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js",
+    "lint": "npx eslint js/**/*.js tests/**/*.js"
+  },
+  "keywords": [
+    "fifa",
+    "world-cup",
+    "stadium",
+    "ai",
+    "gemini",
+    "pwa"
+  ],
+  "author": "Ritesh",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.56.0"
+  }
+}

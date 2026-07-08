@@ -96,7 +96,7 @@ const DecisionSupport = (() => {
     const safeDesc = description.replace(/<[^>]*>/g, '').slice(0, 500);
     const density = Math.round((Simulation.getDensity(zone) || 0.5) * 100);
 
-    resultEl.innerHTML = `<div class="loading-spinner"><div class="spinner"></div><span>AI analyzing incident…</span></div>`;
+    resultEl.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><span>AI analyzing incident…</span></div>';
 
     const incidentData = { type, zone, density, description: safeDesc };
 

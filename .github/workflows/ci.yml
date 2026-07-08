@@ -17,11 +17,23 @@ concurrency:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Linting and Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --quiet
+
+      - name: Run ESLint
+        run: npm run lint
 
       - name: Run QUnit tests headlessly
         run: npx --yes qunit-puppeteer tests/index.html || echo "See tests/index.html for full run"

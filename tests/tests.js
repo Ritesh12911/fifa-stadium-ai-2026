@@ -168,7 +168,6 @@ QUnit.module('GeminiClient', function () {
     // Simulate sanitization by calling chat and checking no HTML injection
     // (we test the logic independently since sanitize is private)
     const unsafe = '<script>alert("xss")</script> Hello';
-    const expected = 'alert("xss") Hello'; // HTML stripped
     // Test indirectly: if chat throws API_KEY_MISSING before any processing
     // we know the key guard is in place
     GeminiClient.setApiKey('');
