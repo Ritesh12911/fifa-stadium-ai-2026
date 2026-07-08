@@ -5,8 +5,12 @@ Streamlit entry point: inlines all HTML/CSS/JS and serves the full SPA.
 
 import os
 import re
+import logging
 import streamlit as st
 import streamlit.components.v1 as components
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -36,6 +40,25 @@ st.markdown("""
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
+def _rebuild_csp(_match: "re.Match") -> str:
+    """
+    Rebuilds the Content-Security-Policy for delivery inside Streamlit's
+    sandboxed iframe, instead of dropping the policy entirely.
+    `frame-ancestors *` is required so the host page (Streamlit) can embed
+    this document in an iframe; every other directive is preserved as-is.
+    """
+    return (
+        '<meta http-equiv="Content-Security-Policy" '
+        'content="default-src \'self\'; '
+        'script-src \'self\' \'unsafe-inline\'; '
+        'style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com; '
+        'font-src https://fonts.gstatic.com; '
+        'connect-src https://generativelanguage.googleapis.com; '
+        'img-src \'self\' data:; '
+        'frame-ancestors *;">'
+    )
+
+
 @st.cache_data(show_spinner=False)
 def build_inline_html() -> str:
     """
@@ -46,22 +69,25 @@ def build_inline_html() -> str:
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
 
-    # 1. Remove Content-Security-Policy meta (would block external fonts inside iframe)
+    # 1. Rebuild Content-Security-Policy meta for iframe delivery
+    #    (previously this was stripped entirely, which silently dropped
+    #    a security control the README documents as being in place).
     html = re.sub(
         r'<meta\s+http-equiv=["\']Content-Security-Policy["\'][^>]*>',
-        "",
+        _rebuild_csp,
         html,
         flags=re.IGNORECASE,
     )
 
     # 2. Inline CSS files  (e.g. <link rel="stylesheet" href="css/style.css">)
-    def _inline_css(m: re.Match) -> str:
+    def _inline_css(m: "re.Match") -> str:
         href = m.group(1)
         path = os.path.join(BASE_DIR, href.replace("/", os.sep))
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return f"<style>{f.read()}</style>"
         except FileNotFoundError:
+            logger.warning("CSS asset not found, leaving tag as-is: %s", path)
             return m.group(0)
 
     html = re.sub(
@@ -71,13 +97,14 @@ def build_inline_html() -> str:
     )
 
     # 3. Inline JS files  (e.g. <script src="js/app.js"></script>)
-    def _inline_js(m: re.Match) -> str:
+    def _inline_js(m: "re.Match") -> str:
         src = m.group(1)
         path = os.path.join(BASE_DIR, src.replace("/", os.sep))
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return f"<script>{f.read()}</script>"
         except FileNotFoundError:
+            logger.warning("JS asset not found, leaving tag as-is: %s", path)
             return m.group(0)
 
     html = re.sub(

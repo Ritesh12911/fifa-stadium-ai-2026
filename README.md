@@ -1,5 +1,10 @@
 # StadiumIQ — FIFA World Cup 2026 Smart Stadium AI Platform
 
+[![CI](https://github.com/Ritesh12911/fifa-stadium-ai-2026/actions/workflows/ci.yml/badge.svg)](https://github.com/Ritesh12911/fifa-stadium-ai-2026/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg)](https://streamlit.io)
+
 > **Challenge 4: Smart Stadiums & Tournament Operations**  
 > Build a GenAI-enabled architecture that optimizes venue operations and elevates the tournament experience for fans, organizers, volunteers, and on-ground staff.
 
@@ -108,21 +113,38 @@ Open `tests/index.html` in a browser. The QUnit test suite covers:
 
 ```
 fifa-stadium-ai-2026/
-├── index.html              ← Main application (SPA)
+├── .github/
+│   ├── workflows/
+│   │   └── ci.yml              ← CI/CD pipeline (lint + test + security)
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md       ← Bug report template
+│   │   └── feature_request.md  ← Feature request template
+│   └── pull_request_template.md
 ├── css/
-│   └── style.css           ← Complete design system
+│   └── style.css               ← Complete design system
 ├── js/
-│   ├── config.js           ← Configuration & constants
-│   ├── gemini.js           ← Google Gemini AI client
-│   ├── simulation.js       ← Live data simulation engine
-│   ├── crowd.js            ← Crowd management + canvas heatmap
-│   ├── navigation.js       ← Smart navigation + SVG map
-│   ├── assistant.js        ← Multilingual AI chat
-│   ├── decision.js         ← Decision support + incident AI
-│   └── app.js              ← SPA router + main controller
-└── tests/
-    ├── index.html          ← Test runner
-    └── tests.js            ← QUnit test suite
+│   ├── config.js               ← Configuration & constants
+│   ├── gemini.js               ← Google Gemini AI client
+│   ├── simulation.js           ← Live data simulation engine
+│   ├── crowd.js                ← Crowd management + canvas heatmap
+│   ├── navigation.js           ← Smart navigation + SVG map
+│   ├── assistant.js            ← Multilingual AI chat
+│   ├── decision.js             ← Decision support + incident AI
+│   └── app.js                  ← SPA router + main controller
+├── tests/
+│   ├── index.html              ← QUnit test runner (browser)
+│   ├── tests.js                ← QUnit test suite (25+ cases)
+│   └── test_streamlit_app.py   ← Python unit tests (pytest)
+├── index.html                  ← Main application (SPA)
+├── streamlit_app.py            ← Streamlit deployment wrapper
+├── pyproject.toml              ← Python project configuration
+├── requirements.txt            ← Python dependencies
+├── LICENSE                     ← MIT License
+├── CONTRIBUTING.md             ← Contribution guidelines
+├── CODE_OF_CONDUCT.md          ← Community standards
+├── SECURITY.md                 ← Security disclosure policy
+├── CHANGELOG.md                ← Version history
+└── .editorconfig               ← Editor configuration
 ```
 
 ---
@@ -151,11 +173,14 @@ fifa-stadium-ai-2026/
 
 | Criterion | Implementation |
 |---|---|
-| **Code Quality** | JSDoc comments, ES6+ modules, separation of concerns, no global pollution |
-| **Security** | CSP meta tag, input sanitization, key never stored |
-| **Efficiency** | Canvas RAF loop, debounced simulation, lightweight (no npm) |
-| **Testing** | 25+ test cases across all modules using QUnit |
-| **Accessibility** | ARIA labels, keyboard nav, live regions, semantic HTML |
+| **Code Quality** | JSDoc comments, ES6+ modules, separation of concerns, no global pollution, `.editorconfig` |
+| **Security** | CSP meta tag, input sanitization, key never stored, `SECURITY.md` policy, dependency auditing |
+| **Efficiency** | Canvas RAF loop, debounced simulation, lightweight (no npm), cached Streamlit builds |
+| **Testing** | 25+ JS test cases (QUnit) + Python unit tests (pytest), CI across Python 3.10–3.12 |
+| **CI/CD** | GitHub Actions: linting (flake8), matrix testing, security auditing (`pip-audit`) |
+| **Documentation** | Comprehensive README, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue/PR templates |
+| **Accessibility** | ARIA labels, keyboard nav, live regions, semantic HTML, WCAG 2.1 AA |
+| **Licensing** | MIT License with proper `LICENSE` file and `pyproject.toml` metadata |
 | **Problem Alignment** | All 4 tracks: crowd, navigation, multilang, decision support |
 
 ---
