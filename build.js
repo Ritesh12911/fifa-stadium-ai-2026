@@ -43,17 +43,35 @@ fs.writeFileSync(path.join(distDir, 'css', 'style.min.css'), css);
 console.log('CSS Minified.');
 
 const stripComments = (code) => {
-  let inString = false;
-  let stringChar = null;
-  let inRegex = false;
+  let stack = []; // Track nested contexts: "'", '"', '`', or {type: 'normal-js', braceCount: number}
   let inSingleComment = false;
   let inMultiComment = false;
+  let inRegex = false;
   let result = '';
-  
+
+  const getCurrentContext = () => {
+    if (stack.length === 0) return 'root';
+    const top = stack[stack.length - 1];
+    if (typeof top === 'string') return top;
+    return top.type;
+  };
+
+  const isEscaped = (pos) => {
+    let count = 0;
+    for (let idx = pos - 1; idx >= 0; idx--) {
+      if (code[idx] === '\\') {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return count % 2 === 1;
+  };
+
   for (let i = 0; i < code.length; i++) {
     const char = code[i];
     const nextChar = code[i + 1];
-    
+
     if (inSingleComment) {
       if (char === '\n' || char === '\r') {
         inSingleComment = false;
@@ -61,7 +79,7 @@ const stripComments = (code) => {
       }
       continue;
     }
-    
+
     if (inMultiComment) {
       if (char === '*' && nextChar === '/') {
         inMultiComment = false;
@@ -69,41 +87,75 @@ const stripComments = (code) => {
       }
       continue;
     }
-    
-    if (inString) {
+
+    const context = getCurrentContext();
+
+    if (context === "'" || context === '"') {
       result += char;
-      if (char === stringChar && code[i - 1] !== '\\') {
-        inString = false;
+      if (char === context && !isEscaped(i)) {
+        stack.pop();
       }
       continue;
     }
-    
+
+    if (context === '`') {
+      result += char;
+      if (char === '`' && !isEscaped(i)) {
+        stack.pop();
+      } else if (char === '$' && nextChar === '{') {
+        stack.push({ type: 'normal-js', braceCount: 0 });
+        result += '{';
+        i++;
+      }
+      continue;
+    }
+
     if (inRegex) {
       result += char;
-      if (char === '/' && code[i - 1] !== '\\') {
+      if (char === '/' && !isEscaped(i)) {
         inRegex = false;
       }
       continue;
     }
-    
+
     if (char === '/' && nextChar === '/') {
       inSingleComment = true;
       i++;
       continue;
     }
+
     if (char === '/' && nextChar === '*') {
       inMultiComment = true;
       i++;
       continue;
     }
-    
-    if (char === "'" || char === '"' || char === '`') {
-      inString = true;
-      stringChar = char;
+
+    if (char === "'" || char === '"') {
+      stack.push(char);
       result += char;
       continue;
     }
-    
+
+    if (char === '`') {
+      stack.push('`');
+      result += char;
+      continue;
+    }
+
+    if (context === 'normal-js') {
+      if (char === '{') {
+        stack[stack.length - 1].braceCount++;
+      } else if (char === '}') {
+        if (stack[stack.length - 1].braceCount > 0) {
+          stack[stack.length - 1].braceCount--;
+        } else {
+          stack.pop();
+          result += char;
+          continue;
+        }
+      }
+    }
+
     if (char === '/') {
       const prevText = result.trim();
       const lastChar = prevText[prevText.length - 1];
@@ -113,7 +165,7 @@ const stripComments = (code) => {
         continue;
       }
     }
-    
+
     result += char;
   }
   return result;
