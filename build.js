@@ -42,6 +42,83 @@ css = css.replace(/@import url\(['"]https:\/\/fonts\.googleapis\.com\/css2\?fami
 fs.writeFileSync(path.join(distDir, 'css', 'style.min.css'), css);
 console.log('CSS Minified.');
 
+const stripComments = (code) => {
+  let inString = false;
+  let stringChar = null;
+  let inRegex = false;
+  let inSingleComment = false;
+  let inMultiComment = false;
+  let result = '';
+  
+  for (let i = 0; i < code.length; i++) {
+    const char = code[i];
+    const nextChar = code[i + 1];
+    
+    if (inSingleComment) {
+      if (char === '\n' || char === '\r') {
+        inSingleComment = false;
+        result += char;
+      }
+      continue;
+    }
+    
+    if (inMultiComment) {
+      if (char === '*' && nextChar === '/') {
+        inMultiComment = false;
+        i++;
+      }
+      continue;
+    }
+    
+    if (inString) {
+      result += char;
+      if (char === stringChar && code[i - 1] !== '\\') {
+        inString = false;
+      }
+      continue;
+    }
+    
+    if (inRegex) {
+      result += char;
+      if (char === '/' && code[i - 1] !== '\\') {
+        inRegex = false;
+      }
+      continue;
+    }
+    
+    if (char === '/' && nextChar === '/') {
+      inSingleComment = true;
+      i++;
+      continue;
+    }
+    if (char === '/' && nextChar === '*') {
+      inMultiComment = true;
+      i++;
+      continue;
+    }
+    
+    if (char === "'" || char === '"' || char === '`') {
+      inString = true;
+      stringChar = char;
+      result += char;
+      continue;
+    }
+    
+    if (char === '/') {
+      const prevText = result.trim();
+      const lastChar = prevText[prevText.length - 1];
+      if (!lastChar || [';', ',', '=', '(', '[', '{', ':', '?', '&', '|', '!', '+', '-', '*', '/', '%', '>', '<'].includes(lastChar) || prevText.endsWith('return') || prevText.endsWith('yield') || prevText.endsWith('throw')) {
+        inRegex = true;
+        result += char;
+        continue;
+      }
+    }
+    
+    result += char;
+  }
+  return result;
+};
+
 // 2. Bundle and Minify JS
 const jsFiles = [
   'config.js',
@@ -57,10 +134,8 @@ const jsFiles = [
 let bundledJs = '';
 for (const file of jsFiles) {
   let js = fs.readFileSync(path.join(__dirname, 'js', file), 'utf8');
-  // Strip multi-line comments
-  js = js.replace(/\/\*[\s\S]*?\*\//g, '');
-  // Strip single-line comments (careful not to break URLs or regex)
-  js = js.replace(/(^|[^/])\/\/[^/].*/g, '$1');
+  // Strip comments using safe parser
+  js = stripComments(js);
   // Normalize whitespace
   js = js.replace(/\s+/g, ' ');
   bundledJs += js + '\n';
